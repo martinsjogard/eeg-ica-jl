@@ -4,14 +4,14 @@ using LinearAlgebra
 
 include("msfun_prepare_cosine_filter.jl")
 
-function msfun_meg_ica_corranalysis2(IC::Dict, extdata::Array, cfg::Dict)
+function msfun_ica_meg_signalcorrestimate_trialwise(IC::Dict, extdata::Array, cfg::Dict)
     if extdata === nothing || isempty(extdata)
-        println("msfun_meg_ica_corranalysis2 - WARNING : No external data supplied... Skipping the correlation analysis.")
+        println("msfun_ica_meg_signalcorrestimate_trialwise - WARNING : No external data supplied... Skipping the correlation analysis.")
         return IC
     end
 
     if !haskey(IC, "S") || !(IC["S"] isa AbstractArray) || !(ndims(IC["S"]) in (2, 3))
-        error("msfun_meg_ica_corranalysis2 - ERROR : IC structure missing elements or inconsistent.")
+        error("msfun_ica_meg_signalcorrestimate_trialwise - ERROR : IC structure missing elements or inconsistent.")
     end
 
     epoching = ndims(IC["S"]) == 3
@@ -22,17 +22,17 @@ function msfun_meg_ica_corranalysis2(IC::Dict, extdata::Array, cfg::Dict)
     end
 
     if ndims(extdata) != ndims(IC["S"])
-        error("msfun_meg_ica_corranalysis2 - ERROR : External data array inconsistent.")
+        error("msfun_ica_meg_signalcorrestimate_trialwise - ERROR : External data array inconsistent.")
     end
 
     if epoching
         if size(extdata, 1) != K || size(extdata, 3) != T
-            error("msfun_meg_ica_corranalysis2 - ERROR : External data not consistent with IC.")
+            error("msfun_ica_meg_signalcorrestimate_trialwise - ERROR : External data not consistent with IC.")
         end
         S = size(extdata, 2)
     else
         if size(extdata, 2) != T
-            error("msfun_meg_ica_corranalysis2 - ERROR : External data not consistent with IC.")
+            error("msfun_ica_meg_signalcorrestimate_trialwise - ERROR : External data not consistent with IC.")
         end
         S = size(extdata, 1)
     end
@@ -53,7 +53,7 @@ function msfun_meg_ica_corranalysis2(IC::Dict, extdata::Array, cfg::Dict)
     end
 
     if epoching
-        println("msfun_meg_ica_corranalysis2 - Baseline correcting and concatenating epochs...")
+        println("msfun_ica_meg_signalcorrestimate_trialwise - Baseline correcting and concatenating epochs...")
         X = zeros(numofic, K*T)
         Y = zeros(S, K*T)
         for k in 1:K
@@ -68,13 +68,13 @@ function msfun_meg_ica_corranalysis2(IC::Dict, extdata::Array, cfg::Dict)
     end
 
     if cfg["filter"]
-        println("msfun_meg_ica_corranalysis2 - Filtering ICs and external data...")
+        println("msfun_ica_meg_signalcorrestimate_trialwise - Filtering ICs and external data...")
         win, F = msfun_prepare_cosine_filter(cfg["filt"], T, cfg["filt"]["sfreq"])
         IC["S"] = real(ifft(fft(IC["S"] .* win', 2) .* F, 2))
         extdata = real(ifft(fft(extdata .* win', 2) .* F, 2))
     end
 
-    println("msfun_meg_ica_corranalysis2 - Performing correlation analysis...")
+    println("msfun_ica_meg_signalcorrestimate_trialwise - Performing correlation analysis...")
     sigrho = cor(extdata', IC["S']")
     powrho = cor.(extdata'.^2, IC["S'].^2)
 
@@ -93,6 +93,6 @@ function msfun_meg_ica_corranalysis2(IC::Dict, extdata::Array, cfg::Dict)
 
     IC["corr"]["list"] = sort(unique(IC["corr"]["list"]))
 
-    println("msfun_meg_ica_corranalysis2 - Done.")
+    println("msfun_ica_meg_signalcorrestimate_trialwise - Done.")
     return IC
 end
