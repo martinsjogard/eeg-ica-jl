@@ -1,7 +1,7 @@
 using FFTW, Statistics
 
-function msfun_meg_ica_powerspectrum(IC::Dict, cfg::Dict)
-    haskey(IC, "S") || error("msfun_meg_ica_powerspectrum - ERROR: IC structure missing elements... Try again.")
+function msfun_ica_meg_spectraldensity(IC::Dict, cfg::Dict)
+    haskey(IC, "S") || error("msfun_ica_meg_spectraldensity - ERROR: IC structure missing elements... Try again.")
     S = IC["S"]
 
     ndims_S = ndims(S)
@@ -12,16 +12,16 @@ function msfun_meg_ica_powerspectrum(IC::Dict, cfg::Dict)
         epoching = true
         (K, numofic, T) = size(S)
     else
-        error("msfun_meg_ica_powerspectrum - ERROR: IC.S must be 2D or 3D array.")
+        error("msfun_ica_meg_spectraldensity - ERROR: IC.S must be 2D or 3D array.")
     end
 
     sfreq = get(cfg, "sfreq", 1000)
     epoch_len = get(cfg, "epoch", T)
     overlap = get(cfg, "overlap", 2)
 
-    println("msfun_meg_ica_powerspectrum - Computing Fourier power spectrum of ICs...")
-    println("msfun_meg_ica_powerspectrum -       epoch length $(epoch_len/sfreq) sec...")
-    println("msfun_meg_ica_powerspectrum -       epochs overlap $overlap...")
+    println("msfun_ica_meg_spectraldensity - Computing Fourier power spectrum of ICs...")
+    println("msfun_ica_meg_spectraldensity -       epoch length $(epoch_len/sfreq) sec...")
+    println("msfun_ica_meg_spectraldensity -       epochs overlap $overlap...")
 
     if !epoching
         powspctrm = zeros(numofic, epoch_len)
@@ -53,8 +53,8 @@ function msfun_meg_ica_powerspectrum(IC::Dict, cfg::Dict)
     IC["powspctrm"] = powspctrm[:, 1:floor(Int, epoch_len/2)] ./ epoch_len
     IC["freq"] = freq
 
-    println("msfun_meg_ica_powerspectrum -       frequency domain [$(freq[1]) $(freq[end])] Hz...")
-    println("msfun_meg_ica_powerspectrum - Done.")
+    println("msfun_ica_meg_spectraldensity -       frequency domain [$(freq[1]) $(freq[end])] Hz...")
+    println("msfun_ica_meg_spectraldensity - Done.")
 
     return IC
 end
