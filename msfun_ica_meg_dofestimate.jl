@@ -1,4 +1,3 @@
-
 using LinearAlgebra, Statistics, Printf, Plots
 
 function msfun_ica_meg_dofestimate(data::Array, cfg::Dict)
