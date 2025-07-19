@@ -1,8 +1,8 @@
 using Statistics
 
-function msfun_meg_ica_cumulantanalysis(IC::Dict, cfg::Dict)
+function msfun_ica_meg_nongaussanalysis(IC::Dict, cfg::Dict)
     if !haskey(IC, "S") || !(IC["S"] isa AbstractArray) || !(ndims(IC["S"]) in (2, 3))
-        error("msfun_meg_ica_cumulantanalysis - ERROR : IC structure missing elements or inconsistent.")
+        error("msfun_ica_meg_nongaussanalysis - ERROR : IC structure missing elements or inconsistent.")
     end
 
     epoching = ndims(IC["S"]) == 3
@@ -16,7 +16,7 @@ function msfun_meg_ica_cumulantanalysis(IC::Dict, cfg::Dict)
     Tkurt = get(cfg, "Tkurt", 15.0)
 
     if epoching
-        println("msfun_meg_ica_cumulantanalysis - Baseline correcting and concatenating epochs...")
+        println("msfun_ica_meg_nongaussanalysis - Baseline correcting and concatenating epochs...")
         X = zeros(numofic, K*T)
         for k in 1:K
             av = mean(IC["S"][k, :, :], dims=3)
@@ -25,11 +25,11 @@ function msfun_meg_ica_cumulantanalysis(IC::Dict, cfg::Dict)
         IC["S"] = X
     end
 
-    println("msfun_meg_ica_cumulantanalysis - Computing IC skewness and kurtosis...")
+    println("msfun_ica_meg_nongaussanalysis - Computing IC skewness and kurtosis...")
     skew_vals = [Statistics.skewness(IC["S"][i, :]) for i in 1:numofic]
     kurt_vals = [Statistics.kurtosis(IC["S"][i, :]) for i in 1:numofic]
 
-    println("msfun_meg_ica_cumulantanalysis - Classifying ICs using their kurtosis...")
+    println("msfun_ica_meg_nongaussanalysis - Classifying ICs using their kurtosis...")
     sorted_indices = sortperm(kurt_vals, rev=true)
     IC["S"] = IC["S"][sorted_indices, :]
     if haskey(IC, "A")
@@ -51,6 +51,6 @@ function msfun_meg_ica_cumulantanalysis(IC::Dict, cfg::Dict)
     cumulant["list"] = sort(unique(vcat(list_skew, list_kurt)))
 
     IC["cumulant"] = cumulant
-    println("msfun_meg_ica_cumulantanalysis - Done.")
+    println("msfun_ica_meg_nongaussanalysis - Done.")
     return IC
 end
