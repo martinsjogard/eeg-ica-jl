@@ -2,7 +2,7 @@ using LinearAlgebra
 using Statistics
 using FastICA  # Assumes ICA.jl or equivalent package is installed
 
-function msfun_eeg_ica_estimate(sig::Matrix{Float64}, cfg::Dict=Dict())
+function msfun_estimate_ica_meeg(sig::Matrix{Float64}, cfg::Dict=Dict())
     N, T = size(sig)
     if ndims(sig) != 2
         error("sig must be a 2D array [N x T]")
@@ -11,9 +11,9 @@ function msfun_eeg_ica_estimate(sig::Matrix{Float64}, cfg::Dict=Dict())
     normalize = get(cfg, "normalize", nothing)
     fastica_params = get(cfg, "fastica", Dict("fun" => "tanh", "n_components" => min(N, 30)))
 
-    println("msfun_eeg_ica_estimate - Normalizing data units...")
+    println("msfun_estimate_ica_meeg - Normalizing data units...")
     if normalize === nothing
-        println("msfun_eeg_ica_estimate -       using temporal standard deviation of data...")
+        println("msfun_estimate_ica_meeg -       using temporal standard deviation of data...")
         normalize = std(sig, dims=2)
     else
         normalize = vec(normalize)
@@ -24,7 +24,7 @@ function msfun_eeg_ica_estimate(sig::Matrix{Float64}, cfg::Dict=Dict())
 
     sig_norm = sig ./ normalize
 
-    println("msfun_eeg_ica_estimate - FASTICA in action...")
+    println("msfun_estimate_ica_meeg - FASTICA in action...")
     num_components = fastica_params["n_components"]
     fun_type = fastica_params["fun"]
 
@@ -33,11 +33,11 @@ function msfun_eeg_ica_estimate(sig::Matrix{Float64}, cfg::Dict=Dict())
     A = result.A
     W = result.W
 
-    println("msfun_eeg_ica_estimate - Restoring original data units...")
+    println("msfun_estimate_ica_meeg - Restoring original data units...")
     A_scaled = A .* normalize
     W_scaled = W ./ normalize'
 
-    println("msfun_eeg_ica_estimate - Done.")
+    println("msfun_estimate_ica_meeg - Done.")
 
     return Dict("A" => A_scaled, "W" => W_scaled, "S" => S)
 end
