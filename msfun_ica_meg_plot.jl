@@ -1,6 +1,6 @@
 using Statistics, Printf, LinearAlgebra, Plots
 
-function msfun_meg_ica_resultfig(IC::Dict)
+function msfun_ica_meg_plot(IC::Dict)
     reject = Int[]
 
     Ncumulant = 0
@@ -31,7 +31,7 @@ function msfun_meg_ica_resultfig(IC::Dict)
     ncol = floor(Int, sqrt(Ntot))
     nrow = ceil(Int, Ntot / ncol)
 
-    println("msfun_meg_ica_resultfig - Generating plots...")
+    println("msfun_ica_meg_plot - Generating plots...")
     plot_list = []
 
     # Plot skewness
