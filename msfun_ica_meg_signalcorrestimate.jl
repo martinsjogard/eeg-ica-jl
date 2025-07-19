@@ -2,9 +2,9 @@ using FFTW, Statistics, LinearAlgebra
 
 include("msfun_prepare_cosine_filter.jl")
 
-function msfun_meg_ica_corranalysis(IC::Dict, extdata, cfg::Dict)
+function msfun_ica_meg_signalcorrestimate(IC::Dict, extdata, cfg::Dict)
     if extdata === nothing || isempty(extdata)
-        println("msfun_meg_ica_corranalysis - WARNING : No external data supplied... Skipping the correlation analysis.")
+        println("msfun_ica_meg_signalcorrestimate - WARNING : No external data supplied... Skipping the correlation analysis.")
         return IC
     end
 
@@ -38,7 +38,7 @@ function msfun_meg_ica_corranalysis(IC::Dict, extdata, cfg::Dict)
     end
 
     if epoching
-        println("msfun_meg_ica_corranalysis - Baseline correcting and concatenating epochs...")
+        println("msfun_ica_meg_signalcorrestimate - Baseline correcting and concatenating epochs...")
         X = zeros(numofic, K * T)
         Y = zeros(S, K * T)
         for k in 1:K
@@ -52,7 +52,7 @@ function msfun_meg_ica_corranalysis(IC::Dict, extdata, cfg::Dict)
     end
 
     if cfg["filter"]
-        println("msfun_meg_ica_corranalysis - Filtering ICs and external data...")
+        println("msfun_ica_meg_signalcorrestimate - Filtering ICs and external data...")
         win, F = msfun_prepare_cosine_filter(cfg["filt"], size(IC["S"], 2), cfg["filt"]["sfreq"])
         icasig = real(ifft(fft(IC["S"] .* win, 2) .* F, 2))
         extdata = real(ifft(fft(extdata .* win, 2) .* F, 2))
@@ -60,7 +60,7 @@ function msfun_meg_ica_corranalysis(IC::Dict, extdata, cfg::Dict)
         icasig = IC["S"]
     end
 
-    println("msfun_meg_ica_corranalysis - Performing correlation analysis...")
+    println("msfun_ica_meg_signalcorrestimate - Performing correlation analysis...")
     rho = cor(transpose(extdata), transpose(icasig))
 
     IC["corr"] = Dict{String, Any}()
@@ -73,6 +73,6 @@ function msfun_meg_ica_corranalysis(IC::Dict, extdata, cfg::Dict)
     end
 
     IC["corr"]["Tcorr"] = cfg["Tcorr"]
-    println("msfun_meg_ica_corranalysis - Done.")
+    println("msfun_ica_meg_signalcorrestimate - Done.")
     return IC
 end
