@@ -1,8 +1,8 @@
 
 using LinearAlgebra, Statistics, Printf, Plots
 
-function msfun_meg_ica_ndof(data::Array, cfg::Dict)
-    ndims(data) in [2, 3] || error("msfun_meg_ica_ndof - ERROR: data must be a numeric array... Try again.")
+function msfun_ica_meg_dofestimate(data::Array, cfg::Dict)
+    ndims(data) in [2, 3] || error("msfun_ica_meg_dofestimate - ERROR: data must be a numeric array... Try again.")
 
     epoching = ndims(data) == 3
     if epoching
@@ -14,17 +14,17 @@ function msfun_meg_ica_ndof(data::Array, cfg::Dict)
     normalize = get(cfg, "normalize", nothing)
     if normalize !== nothing
         normalize = collect(normalize)
-        length(normalize) == N || error("msfun_meg_ica_ndof - ERROR: Normalization factors inconsistent... Try again.")
-        any(x -> x <= 0, normalize) && error("msfun_meg_ica_ndof - ERROR: Normalization values must be positive.")
+        length(normalize) == N || error("msfun_ica_meg_dofestimate - ERROR: Normalization factors inconsistent... Try again.")
+        any(x -> x <= 0, normalize) && error("msfun_ica_meg_dofestimate - ERROR: Normalization values must be positive.")
     end
 
     method = get(cfg, "method", "rel")
-    method in ["abs", "maxrel", "rel"] || error("msfun_meg_ica_ndof - ERROR: Method not recognized... Try again.")
+    method in ["abs", "maxrel", "rel"] || error("msfun_ica_meg_dofestimate - ERROR: Method not recognized... Try again.")
 
     param = get(cfg, "param", 1e3)
 
     if epoching
-        println("msfun_meg_ica_ndof - Baseline correcting and concatenating epochs...")
+        println("msfun_ica_meg_dofestimate - Baseline correcting and concatenating epochs...")
         X = zeros(N, K*T)
         for k in 1:K
             av = mean(data[k, :, :], dims=3)[:]
@@ -33,14 +33,14 @@ function msfun_meg_ica_ndof(data::Array, cfg::Dict)
         data = X
     end
 
-    println("msfun_meg_ica_ndof - Normalizing data...")
+    println("msfun_ica_meg_dofestimate - Normalizing data...")
     if normalize === nothing
         normalize = std(data, dims=2)[:]
-        println("msfun_meg_ica_ndof -   using data standard deviation...")
+        println("msfun_ica_meg_dofestimate -   using data standard deviation...")
     end
     data = data ./ normalize
 
-    println("msfun_meg_ica_ndof - Computing normalized data covariance and its eigenvalues...")
+    println("msfun_ica_meg_dofestimate - Computing normalized data covariance and its eigenvalues...")
     D = eigvals(cov(data'))
     D = sort(D)
 
@@ -56,7 +56,7 @@ function msfun_meg_ica_ndof(data::Array, cfg::Dict)
     end
 
     ndof = N - n
-    println("msfun_meg_ica_ndof - Estimated $ndof largest eigendirections...")
+    println("msfun_ica_meg_dofestimate - Estimated $ndof largest eigendirections...")
 
     if method in ["abs", "maxrel"]
         plot(D, label="Eigenvalues", color=:red)
