@@ -1,10 +1,20 @@
 # msfun_meg_ica_viewer.jl
-# Placeholder for Julia translation of MATLAB ICA Viewer
 
-function msfun_meg_ica_viewer(raw, times, IC, cfg=nothing)
-    if cfg === nothing
-        cfg = Dict()
-    end
+"""
+msfun_meg_ica_viewer(raw, times, IC; cfg=Dict())
 
-    error("This function is a MATLAB viewer port. Interactive GUI functionality must be implemented separately.")
+This is a placeholder function for the MATLAB `meg_ica_viewer`.
+It was originally an interactive GUI viewer for inspecting IC time series and topoplots.
+
+Arguments:
+- `raw`: header information or data structure
+- `times`: time vector or matrix
+- `IC`: dictionary with fields "S", "A", possibly "powspctrm"
+- `cfg`: configuration dictionary (optional)
+
+Note: Interactive GUI not implemented in this Julia version.
+"""
+
+function msfun_meg_ica_viewer(raw, times, IC; cfg=Dict())
+    error("Interactive GUI viewer must be rebuilt using Makie.jl, Gtk.jl, or similar in Julia.")
 end
