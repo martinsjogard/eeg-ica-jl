@@ -1,4 +1,4 @@
-function msfun_ica_meg_estimate(raw::Dict, data::Array, extdata=nothing, cfg=Dict())
+function msfun_ica_megdecomp(raw::Dict, data::Array, extdata=nothing, cfg=Dict())
     # Load required functions (assumed to be in other files or modules)
     using .MsFun  # assumes a module MsFun that includes these functions
 
@@ -26,24 +26,24 @@ function msfun_ica_meg_estimate(raw::Dict, data::Array, extdata=nothing, cfg=Dic
     end
 
     if N != 306
-        println("msfun_ica_meg_estimate - WARNING: Data may not come from Neuromag Elekta MEG system")
+        println("msfun_ica_megdecomp - WARNING: Data may not come from Neuromag Elekta MEG system")
     end
 
-    println("msfun_ica_meg_estimate - Preparing data for ICA...")
+    println("msfun_ica_megdecomp - Preparing data for ICA...")
 
     if epoching
-        println("msfun_ica_meg_estimate - Baseline correcting and concatenating epochs...")
+        println("msfun_ica_megdecomp - Baseline correcting and concatenating epochs...")
         data = data .- mean(data, dims=3)
         data = msfun_sig_concat_epoch(data, K, "epochnum")
     end
 
-    IC = msfun_meg_ica_estimate(data, get(cfg, "ica", Dict()))
-    IC = msfun_meg_ica_cumulantanalysis(IC, get(cfg, "cumulant", Dict()))
+    IC = msfun_ica_megdecomp(data, get(cfg, "ica", Dict()))
+    IC = msfun_ica_meg_nongaussanalysis(IC, get(cfg, "cumulant", Dict()))
 
     if get(cfg, "corranalysis", false)
-        println("msfun_ica_meg_estimate - Preparing external signals for correlation analysis...")
+        println("msfun_ica_megdecomp - Preparing external signals for correlation analysis...")
         if epoching
-            println("msfun_ica_meg_estimate -       baseline correcting and concatenating epochs...")
+            println("msfun_ica_megdecomp -       baseline correcting and concatenating epochs...")
             X = zeros(S, K*T)
             for k in 1:K
                 av = mean(extdata[k, :, :], dims=3)
@@ -53,20 +53,20 @@ function msfun_ica_meg_estimate(raw::Dict, data::Array, extdata=nothing, cfg=Dic
             end
             extdata = X
         end
-        IC = msfun_meg_ica_corranalysis(IC, extdata, get(cfg, "corr", Dict()))
+        IC = msfun_ica_meg_signalcorrestimate(IC, extdata, get(cfg, "corr", Dict()))
     end
 
     if epoching
-        println("msfun_ica_meg_estimate - Restoring epochs in IC time courses...")
+        println("msfun_ica_megdecomp - Restoring epochs in IC time courses...")
         IC["S"] = msfun_sig_concat_epoch(IC["S"], K, "epochlength")
     end
 
     if get(cfg, "spectralanalysis", false)
-        IC = msfun_meg_ica_powerspectrum(IC, get(cfg, "fft", Dict()))
-        IC = msfun_meg_ica_spectralanalysis(IC, get(cfg, "spectral", Dict()))
+        IC = msfun_ica_meg_spectraldensity(IC, get(cfg, "fft", Dict()))
+        IC = msfun_ica_meg_spectralfit(IC, get(cfg, "spectral", Dict()))
     end
 
-    keep, reject, _ = msfun_meg_ica_resultfig(IC)
+    keep, reject, _ = msfun_ica_meg_plot(IC)
     if !haskey(cfg, "viewer")
         cfg["viewer"] = Dict()
     end
