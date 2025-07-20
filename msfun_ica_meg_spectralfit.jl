@@ -3,7 +3,7 @@ using Plots
 using Statistics
 using Printf
 
-function msfun_meg_ica_spectralfit(IC::Dict, cfg::Dict)
+function msfun_ica_meg_spectralfit(IC::Dict, cfg::Dict)
     if !haskey(IC, "freq") || !haskey(IC, "powspctrm")
         error("IC structure missing required fields 'freq' and 'powspctrm'")
     end
