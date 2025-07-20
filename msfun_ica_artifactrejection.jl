@@ -2,7 +2,7 @@ using LinearAlgebra
 using Plots
 using Statistics
 
-function msfun_remartIC(data, IC::Dict, list=nothing, flag=true)
+function msfun_ica_artifactrejection(data, IC::Dict, list=nothing, flag=true)
     if list === nothing || isempty(list)
         if haskey(IC, "artdetect") && haskey(IC["artdetect"], "list")
             list = IC["artdetect"]["list"]
