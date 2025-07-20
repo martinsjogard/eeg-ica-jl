@@ -2,7 +2,7 @@ using FFTW
 using Statistics
 using LinearAlgebra
 
-include("msfun_prepare_cosine_filter.jl")
+include("msfun_filt_preparecosine.jl")
 
 function msfun_ica_meg_signalcorrestimate_trialwise(IC::Dict, extdata::Array, cfg::Dict)
     if extdata === nothing || isempty(extdata)
@@ -69,7 +69,7 @@ function msfun_ica_meg_signalcorrestimate_trialwise(IC::Dict, extdata::Array, cf
 
     if cfg["filter"]
         println("msfun_ica_meg_signalcorrestimate_trialwise - Filtering ICs and external data...")
-        win, F = msfun_prepare_cosine_filter(cfg["filt"], T, cfg["filt"]["sfreq"])
+        win, F = msfun_filt_preparecosine(cfg["filt"], T, cfg["filt"]["sfreq"])
         IC["S"] = real(ifft(fft(IC["S"] .* win', 2) .* F, 2))
         extdata = real(ifft(fft(extdata .* win', 2) .* F, 2))
     end
