@@ -1,6 +1,6 @@
 using FFTW, Statistics, LinearAlgebra
 
-include("msfun_prepare_cosine_filter.jl")
+include("msfun_filt_preparecosine.jl")
 
 function msfun_ica_meg_signalcorrestimate(IC::Dict, extdata, cfg::Dict)
     if extdata === nothing || isempty(extdata)
@@ -53,7 +53,7 @@ function msfun_ica_meg_signalcorrestimate(IC::Dict, extdata, cfg::Dict)
 
     if cfg["filter"]
         println("msfun_ica_meg_signalcorrestimate - Filtering ICs and external data...")
-        win, F = msfun_prepare_cosine_filter(cfg["filt"], size(IC["S"], 2), cfg["filt"]["sfreq"])
+        win, F = msfun_filt_preparecosine(cfg["filt"], size(IC["S"], 2), cfg["filt"]["sfreq"])
         icasig = real(ifft(fft(IC["S"] .* win, 2) .* F, 2))
         extdata = real(ifft(fft(extdata .* win, 2) .* F, 2))
     else
